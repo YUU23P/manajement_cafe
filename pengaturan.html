@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan Manajemen Kafe</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-md h-screen">
+            <div class="p-4">
+                <h1 class="text-2xl font-bold">Manajemen Kafe</h1>
+            </div>
+            <nav class="mt-6">
+                <a href="index.html" class="block py-2 px-4 text-gray-700 hover:bg-gray-200">Dashboard</a>
+                <a href="pesanan.html" class="block py-2 px-4 text-gray-700 hover:bg-gray-200">Pesanan</a>
+                <a href="menu.html" class="block py-2 px-4 text-gray-700 hover:bg-gray-200">Menu</a>
+                <a href="karyawan.html" class="block py-2 px-4 text-gray-700 hover:bg-gray-200">Karyawan</a>
+                <a href="laporan.html" class="block py-2 px-4 text-gray-700 hover:bg-gray-200">Laporan</a>
+                <a href="pengaturan.html" class="block py-2 px-4 text-gray-700 hover:bg-gray-200">Pengaturan</a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6">
+            <h2 class="text-3xl font-bold mb-6">Pengaturan Aplikasi</h2>
+            <form id="settingsForm">
+                <div class="mb-4">
+                    <label for="appName" class="block text-gray-700">Nama Aplikasi</label>
+                    <input type="text" id="appName" class="border rounded w-full py-2 px-3" required>
+                </div>
+                <div class="mb-4">
+                    <label for="appEmail" class="block text-gray-700">Email Kontak</label>
+                    <input type="email" id="appEmail" class="border rounded w-full py-2 px-3" required>
+                </div>
+                <div class="mb-4">
+                    <label for="appPhone" class="block text-gray-700">No Telepon</label>
+                    <input type="text" id="appPhone" class="border rounded w-full py-2 px-3" required>
+                </div>
+                <div class="mb-4">
+                    <label for="appAddress" class="block text-gray-700">Alamat</label>
+                    <input type="text" id="appAddress" class="border rounded w-full py-2 px-3" required>
+                </div>
+                <div class="flex justify-between">
+                    <button type="button" class="bg-gray-300 text-gray-700 px-4 py-2 rounded">Batal</button>
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manajemen Menu - Kafe</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+  <div class="flex flex-col lg:flex-row">
+    <!-- Sidebar -->
+    <aside class="w-full lg:w-64 bg-white shadow-md min-h-screen lg:block hidden">
+      <div class="p-6">
+        <h1 class="text-2xl font-bold text-blue-600">☕ Manajemen Kafe</h1>
+      </div>
+      <nav class="mt-4 space-y-1 px-4">
+        <a href="index.html" class="block py-2 px-3 rounded hover:bg-blue-100 text-blue-600 font-medium">Dashboard</a>
+        <a href="pesanan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Pesanan</a>
+        <a href="menu.html" class="block py-2 px-3 rounded hover:bg-blue-100">Menu</a>
+        <a href="karyawan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Karyawan</a>
+        <a href="laporan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Laporan</a>
+        <a href="pengaturan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Pengaturan</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8">
+      <h2 class="text-4xl font-bold mb-8 text-gray-800">Menu Kafe</h2>
+
+      <!-- Tombol Tambah Menu -->
+      <section class="mb-6">
+        <button id="tambahMenuBtn" class="bg-blue-600 text-white px-6 py-2 rounded-md">Tambah Menu</button>
+      </section>
+
+      <!-- Tabel Menu -->
+      <section>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-700">Daftar Menu</h2>
+        <div class="overflow-x-auto bg-white rounded-xl shadow-md">
+          <table class="min-w-full">
+            <thead class="bg-gray-200">
+              <tr>
+                <th class="py-3 px-4 text-left">Nama Menu</th>
+                <th class="py-3 px-4 text-left">Harga</th>
+                <th class="py-3 px-4 text-left">Stok</th>
+                <th class="py-3 px-4 text-left">Rating</th>
+                <th class="py-3 px-4 text-left">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="menuTableBody">
+              <!-- Data Menu akan ditampilkan disini -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal Tambah Menu -->
+  <div id="modalTambah" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
+    <div class="bg-white p-6 rounded-xl w-96 shadow-xl">
+      <h2 class="text-xl font-bold mb-4 text-gray-700">Tambah Menu Baru</h2>
+      <form id="tambahForm">
+        <div class="mb-4">
+          <label for="tambahNamaMenu" class="block text-gray-600 mb-1">Nama Menu</label>
+          <input type="text" id="tambahNamaMenu" class="w-full border px-3 py-2 rounded" required />
+        </div>
+        <div class="mb-4">
+          <label for="tambahHarga" class="block text-gray-600 mb-1">Harga</label>
+          <input type="number" id="tambahHarga" class="w-full border px-3 py-2 rounded" required />
+        </div>
+        <div class="mb-4">
+          <label for="tambahStok" class="block text-gray-600 mb-1">Stok</label>
+          <input type="number" id="tambahStok" class="w-full border px-3 py-2 rounded" required />
+        </div>
+        <div class="mb-4">
+          <label for="tambahRating" class="block text-gray-600 mb-1">Rating</label>
+          <input type="number" id="tambahRating" step="0.1" min="0" max="5" class="w-full border px-3 py-2 rounded" required />
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" id="cancelTambahBtn" class="bg-gray-300 px-4 py-2 rounded">Batal</button>
+          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const modalTambah = document.getElementById('modalTambah');
+    const cancelTambahBtn = document.getElementById('cancelTambahBtn');
+    const tambahMenuBtn = document.getElementById('tambahMenuBtn');
+    let menuTableBody = document.getElementById('menuTableBody');
+    let editRowIndex = -1;
+
+    function loadMenu() {
+      const menuData = JSON.parse(localStorage.getItem('menu')) || [];
+      menuTableBody.innerHTML = '';
+      menuData.forEach((menu, index) => {
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+          <td class="py-3 px-4 namaMenu">${menu.nama}</td>
+          <td class="py-3 px-4 harga">Rp ${menu.harga}</td>
+          <td class="py-3 px-4 stok">${menu.stok}</td>
+          <td class="py-3 px-4 rating">${menu.rating}</td>
+          <td class="py-3 px-4 space-x-2">
+            <button class="text-blue-500 font-semibold editBtn" data-index="${index}">Edit</button>
+            <button class="text-red-500 font-semibold deleteBtn" data-index="${index}">Hapus</button>
+            <button class="text-green-600 font-semibold pesanBtn" data-nama="${menu.nama}" data-harga="${menu.harga}">Pesan</button>
+          </td>
+        `;
+        menuTableBody.appendChild(newRow);
+      });
+
+      // Event untuk Edit
+      document.querySelectorAll('.editBtn').forEach(button => {
+        button.addEventListener('click', function () {
+          const index = this.getAttribute('data-index');
+          const menuData = JSON.parse(localStorage.getItem('menu')) || [];
+          const menu = menuData[index];
+          openEditModal(menu, index);
+        });
+      });
+
+      // Event untuk Hapus
+      document.querySelectorAll('.deleteBtn').forEach(button => {
+        button.addEventListener('click', function () {
+          const index = this.getAttribute('data-index');
+          deleteMenu(index);
+        });
+      });
+
+      // Event untuk Pesan
+      document.querySelectorAll('.pesanBtn').forEach(button => {
+        button.addEventListener('click', function () {
+          const namaMenu = this.getAttribute('data-nama');
+          const harga = parseInt(this.getAttribute('data-harga'));
+          pesanMenu(namaMenu, harga);
+        });
+      });
+    }
+
+    tambahMenuBtn.addEventListener('click', function () {
+      modalTambah.classList.remove('hidden');
+      modalTambah.classList.add('flex');
+    });
+
+    cancelTambahBtn.addEventListener('click', () => {
+      modalTambah.classList.add('hidden');
+      modalTambah.classList.remove('flex');
+    });
+
+    document.getElementById('tambahForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      
+      const namaMenu = document.getElementById('tambahNamaMenu').value;
+      const harga = document.getElementById('tambahHarga').value;
+      const stok = document.getElementById('tambahStok').value;
+      const rating = document.getElementById('tambahRating').value;
+
+      const menuData = JSON.parse(localStorage.getItem('menu')) || [];
+
+      if (editRowIndex > -1) {
+        menuData[editRowIndex] = { nama: namaMenu, harga, stok, rating };
+        editRowIndex = -1;
+      } else {
+        menuData.push({ nama: namaMenu, harga, stok, rating });
+      }
+
+      localStorage.setItem('menu', JSON.stringify(menuData));
+      loadMenu();
+
+      modalTambah.classList.add('hidden');
+      modalTambah.classList.remove('flex');
+    });
+
+    function openEditModal(menu, index) {
+      document.getElementById('tambahNamaMenu').value = menu.nama;
+      document.getElementById('tambahHarga').value = menu.harga;
+      document.getElementById('tambahStok').value = menu.stok;
+      document.getElementById('tambahRating').value = menu.rating;
+      modalTambah.classList.remove('hidden');
+      modalTambah.classList.add('flex');
+      editRowIndex = index;
+    }
+
+    function deleteMenu(index) {
+      const menuData = JSON.parse(localStorage.getItem('menu')) || [];
+      menuData.splice(index, 1);
+      localStorage.setItem('menu', JSON.stringify(menuData));
+      loadMenu();
+    }
+
+    function pesanMenu(namaMenu, harga) {
+      const nama = prompt("Nama pelanggan:");
+      const noMeja = prompt("No Meja:");
+      const jumlah = parseInt(prompt("Jumlah:"));
+      const totalHarga = jumlah * harga;
+      const status = "belumBayar";
+
+      const pesanan = { nama, noMeja, menu: namaMenu, jumlah, totalHarga, status };
+      const pesananSebelumnya = JSON.parse(localStorage.getItem('daftarPesanan')) || [];
+      pesananSebelumnya.push(pesanan);
+      localStorage.setItem('daftarPesanan', JSON.stringify(pesananSebelumnya));
+
+      alert("Pesanan berhasil ditambahkan!");
+    }
+
+    window.addEventListener('DOMContentLoaded', loadMenu);
+  </script>
+</body>
+</html>

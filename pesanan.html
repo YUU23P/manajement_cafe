@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Manajemen Kafe</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+</head>
+<body class="bg-gray-100 font-sans">
+
+  <div class="flex flex-col md:flex-row">
+    <!-- Sidebar -->
+    <aside class="w-full md:w-64 bg-white shadow-md md:min-h-screen">
+      <div class="p-6">
+        <h1 class="text-2xl font-bold text-blue-600">☕ Manajemen Kafe</h1>
+      </div>
+      <nav class="mt-4 space-y-1 px-4">
+        <a href="index.html" class="block py-2 px-3 rounded hover:bg-blue-100 text-blue-600 font-medium">Dashboard</a>
+        <a href="pesanan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Pesanan</a>
+        <a href="menu.html" class="block py-2 px-3 rounded hover:bg-blue-100">Menu</a>
+        <a href="karyawan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Karyawan</a>
+        <a href="laporan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Laporan</a>
+        <a href="pengaturan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Pengaturan</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8 md:p-10">
+      <h2 class="text-4xl font-bold mb-8 text-gray-800">Statistik</h2>
+
+      <!-- Statistik -->
+      <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+          <h3 class="text-lg text-gray-500 mb-2">Total Pesanan</h3>
+          <p id="totalPesanan" class="text-3xl font-bold text-green-600">0</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+          <h3 class="text-lg text-gray-500 mb-2">Total Penghasilan</h3>
+          <p id="totalPenghasilan" class="text-3xl font-bold text-blue-600">Rp 0</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+          <h3 class="text-lg text-gray-500 mb-2">Pesanan Selesai</h3>
+          <p id="totalSelesai" class="text-3xl font-bold text-green-600">0</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+          <h3 class="text-lg text-gray-500 mb-2">Pesanan Proses</h3>
+          <p id="totalProses" class="text-3xl font-bold text-yellow-600">0</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+          <h3 class="text-lg text-gray-500 mb-2">Pesanan Belum Dibayar</h3>
+          <p id="totalBelumBayar" class="text-3xl font-bold text-red-600">0</p>
+        </div>
+      </section>
+
+      <!-- Tabel Pesanan -->
+      <section>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-700">Daftar Pesanan</h2>
+        <div class="overflow-x-auto bg-white rounded-xl shadow-md">
+          <table class="min-w-full">
+            <thead class="bg-gray-200">
+              <tr>
+                <th class="py-3 px-4 text-left">Nama</th>
+                <th class="py-3 px-4 text-left">No Meja</th>
+                <th class="py-3 px-4 text-left">Menu</th>
+                <th class="py-3 px-4 text-left">Jumlah</th>
+                <th class="py-3 px-4 text-left">Total Harga</th>
+                <th class="py-3 px-4 text-left">Status</th>
+              </tr>
+            </thead>
+            <tbody id="pesananTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    let pesananData = JSON.parse(localStorage.getItem('daftarPesanan')) || [];
+
+    function simpanKeLocalStorage() {
+      localStorage.setItem('daftarPesanan', JSON.stringify(pesananData));
+    }
+
+    function updateStatistics() {
+      let totalPesanan = pesananData.length;
+      let totalPenghasilan = 0;
+      let totalSelesai = 0;
+      let totalProses = 0;
+      let totalBelumBayar = 0;
+
+      pesananData.forEach((pesanan) => {
+        if (pesanan.status === 'selesai') {
+          totalSelesai++;
+          totalPenghasilan += pesanan.totalHarga;
+        } else if (pesanan.status === 'proses') {
+          totalProses++;
+        } else if (pesanan.status === 'belumBayar') {
+          totalBelumBayar++;
+        }
+      });
+
+      document.getElementById('totalPesanan').textContent = totalPesanan;
+      document.getElementById('totalPenghasilan').textContent = `Rp ${totalPenghasilan.toLocaleString()}`;
+      document.getElementById('totalSelesai').textContent = totalSelesai;
+      document.getElementById('totalProses').textContent = totalProses;
+      document.getElementById('totalBelumBayar').textContent = totalBelumBayar;
+    }
+
+    function renderPesananTable() {
+      const tableBody = document.getElementById('pesananTableBody');
+      tableBody.innerHTML = '';
+
+      pesananData.forEach((pesanan, index) => {
+        const row = document.createElement('tr');
+        row.classList.add('border-b');
+
+        row.innerHTML = `
+          <td class="py-3 px-4">${pesanan.nama}</td>
+          <td class="py-3 px-4">${pesanan.noMeja}</td>
+          <td class="py-3 px-4">${pesanan.menu}</td>
+          <td class="py-3 px-4">${pesanan.jumlah}</td>
+          <td class="py-3 px-4">Rp ${pesanan.totalHarga.toLocaleString()}</td>
+          <td class="py-3 px-4">
+            <select class="border px-3 py-2 rounded" onchange="ubahStatus(${index}, this.value)">
+              <option value="selesai" ${pesanan.status === 'selesai' ? 'selected' : ''}>Selesai</option>
+              <option value="proses" ${pesanan.status === 'proses' ? 'selected' : ''}>Proses</option>
+              <option value="belumBayar" ${pesanan.status === 'belumBayar' ? 'selected' : ''}>Belum Dibayar</option>
+            </select>
+          </td>
+        `;
+        
+        tableBody.appendChild(row);
+      });
+    }
+
+    function ubahStatus(index, status) {
+      pesananData[index].status = status;
+      simpanKeLocalStorage();
+      updateStatistics();
+      renderPesananTable();
+    }
+
+    function addPesanan(nama, noMeja, menu, jumlah, totalHarga, status) {
+      const pesanan = { nama, noMeja, menu, jumlah, totalHarga, status };
+      pesananData.push(pesanan);
+      simpanKeLocalStorage();
+      updateStatistics();
+      renderPesananTable();
+    }
+
+    function init() {
+      renderPesananTable();
+      updateStatistics();
+    }
+
+    init();
+  </script>
+</body>
+</html>

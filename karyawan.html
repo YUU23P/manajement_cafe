@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manajemen Karyawan - Kafe</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+</head>
+<body class="bg-gray-100 font-sans">
+  <div class="flex flex-col md:flex-row">
+    <!-- Sidebar -->
+    <aside class="w-full md:w-64 bg-white shadow-md min-h-screen">
+      <div class="p-6">
+        <h1 class="text-2xl font-bold text-blue-600">☕ Manajemen Kafe</h1>
+      </div>
+      <nav class="mt-4 space-y-1 px-4">
+        <a href="index.html" class="block py-2 px-3 rounded hover:bg-blue-100 text-blue-600 font-medium">Dashboard</a>
+        <a href="pesanan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Pesanan</a>
+        <a href="menu.html" class="block py-2 px-3 rounded hover:bg-blue-100">Menu</a>
+        <a href="karyawan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Karyawan</a>
+        <a href="laporan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Laporan</a>
+        <a href="pengaturan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Pengaturan</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 md:p-8">
+      <h2 class="text-3xl font-bold mb-8 text-gray-800">Daftar Karyawan</h2>
+
+      <!-- Tombol Tambah Karyawan -->
+      <section class="mb-6">
+        <button id="tambahKaryawanBtn" class="bg-blue-600 text-white px-6 py-2 rounded-md">Tambah Karyawan</button>
+      </section>
+
+      <!-- Tabel Karyawan -->
+      <section>
+        <div class="overflow-x-auto bg-white rounded-xl shadow-md">
+          <table class="min-w-full">
+            <thead class="bg-gray-200">
+              <tr>
+                <th class="py-3 px-4 text-left">Foto</th>
+                <th class="py-3 px-4 text-left">Nama</th>
+                <th class="py-3 px-4 text-left">Jenis Kelamin</th>
+                <th class="py-3 px-4 text-left">Alamat</th>
+                <th class="py-3 px-4 text-left">No HP</th>
+                <th class="py-3 px-4 text-left">Jabatan</th>
+                <th class="py-3 px-4 text-left">Gaji</th>
+                <th class="py-3 px-4 text-left">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="karyawanTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal Tambah/Edit Karyawan -->
+  <div id="modalKaryawan" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
+    <div class="bg-white p-6 rounded-xl w-full max-w-lg shadow-xl">
+      <h2 class="text-xl font-bold mb-4 text-gray-700">Form Karyawan</h2>
+      <form id="karyawanForm">
+        <div class="mb-4">
+          <label for="foto" class="block text-gray-600 mb-1">Foto</label>
+          <input type="file" id="foto" accept="image/*" class="w-full border px-3 py-2 rounded" />
+        </div>
+        <div class="mb-4">
+          <label for="nama" class="block text-gray-600 mb-1">Nama</label>
+          <input type="text" id="nama" class="w-full border px-3 py-2 rounded" required />
+        </div>
+        <div class="mb-4">
+          <label for="gender" class="block text-gray-600 mb-1">Jenis Kelamin</label>
+          <select id="gender" class="w-full border px-3 py-2 rounded">
+            <option value="Laki-laki">Laki-laki</option>
+            <option value="Perempuan">Perempuan</option>
+          </select>
+        </div>
+        <div class="mb-4">
+          <label for="alamat" class="block text-gray-600 mb-1">Alamat</label>
+          <textarea id="alamat" class="w-full border px-3 py-2 rounded" required></textarea>
+        </div>
+        <div class="mb-4">
+          <label for="nohp" class="block text-gray-600 mb-1">No HP</label>
+          <input type="text" id="nohp" class="w-full border px-3 py-2 rounded" required />
+        </div>
+        <div class="mb-4">
+          <label for="jabatan" class="block text-gray-600 mb-1">Jabatan</label>
+          <input type="text" id="jabatan" class="w-full border px-3 py-2 rounded" required />
+        </div>
+        <div class="mb-4">
+          <label for="gaji" class="block text-gray-600 mb-1">Gaji</label>
+          <input type="number" id="gaji" class="w-full border px-3 py-2 rounded" required />
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" id="cancelBtn" class="bg-gray-300 px-4 py-2 rounded">Batal</button>
+          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const tambahKaryawanBtn = document.getElementById('tambahKaryawanBtn');
+    const modalKaryawan = document.getElementById('modalKaryawan');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const karyawanForm = document.getElementById('karyawanForm');
+    const karyawanTableBody = document.getElementById('karyawanTableBody');
+    let editIndex = -1;
+
+    tambahKaryawanBtn.onclick = () => {
+      karyawanForm.reset();
+      editIndex = -1;
+      modalKaryawan.classList.remove('hidden');
+      modalKaryawan.classList.add('flex');
+    };
+
+    cancelBtn.onclick = () => {
+      modalKaryawan.classList.add('hidden');
+      modalKaryawan.classList.remove('flex');
+    };
+
+    function loadKaryawan() {
+      const data = JSON.parse(localStorage.getItem('karyawan')) || [];
+      karyawanTableBody.innerHTML = '';
+      data.forEach((k, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="py-2 px-4"><img src="${k.foto}" alt="Foto" class="w-12 h-12 object-cover rounded-full"/></td>
+          <td class="py-2 px-4">${k.nama}</td>
+          <td class="py-2 px-4">${k.gender}</td>
+          <td class="py-2 px-4">${k.alamat}</td>
+          <td class="py-2 px-4">${k.nohp}</td>
+          <td class="py-2 px-4">${k.jabatan}</td>
+          <td class="py-2 px-4">Rp ${k.gaji}</td>
+          <td class="py-2 px-4">
+            <button onclick="editKaryawan(${index})" class="text-blue-600">Edit</button>
+            <button onclick="hapusKaryawan(${index})" class="text-red-600 ml-2">Hapus</button>
+          </td>
+        `;
+        karyawanTableBody.appendChild(row);
+      });
+    }
+
+    karyawanForm.onsubmit = function (e) {
+      e.preventDefault();
+      const file = document.getElementById('foto').files[0];
+      const reader = new FileReader();
+
+      reader.onload = function () {
+        const fotoBase64 = reader.result;
+        simpanKaryawan(fotoBase64);
+      };
+
+      if (file) {
+        reader.readAsDataURL(file);
+      } else {
+        const data = JSON.parse(localStorage.getItem('karyawan')) || [];
+        const existingFoto = data[editIndex]?.foto || '';
+        simpanKaryawan(existingFoto);
+      }
+    };
+
+    function simpanKaryawan(fotoBase64) {
+      const karyawanBaru = {
+        foto: fotoBase64,
+        nama: document.getElementById('nama').value,
+        gender: document.getElementById('gender').value,
+        alamat: document.getElementById('alamat').value,
+        nohp: document.getElementById('nohp').value,
+        jabatan: document.getElementById('jabatan').value,
+        gaji: document.getElementById('gaji').value
+      };
+
+      const data = JSON.parse(localStorage.getItem('karyawan')) || [];
+      if (editIndex > -1) {
+        data[editIndex] = karyawanBaru;
+        editIndex = -1;
+      } else {
+        data.push(karyawanBaru);
+      }
+
+      localStorage.setItem('karyawan', JSON.stringify(data));
+      modalKaryawan.classList.add('hidden');
+      loadKaryawan();
+    }
+
+    function editKaryawan(index) {
+      const data = JSON.parse(localStorage.getItem('karyawan')) || [];
+      const k = data[index];
+      document.getElementById('nama').value = k.nama;
+      document.getElementById('gender').value = k.gender;
+      document.getElementById('alamat').value = k.alamat;
+      document.getElementById('nohp').value = k.nohp;
+      document.getElementById('jabatan').value = k.jabatan;
+      document.getElementById('gaji').value = k.gaji;
+      editIndex = index;
+      modalKaryawan.classList.remove('hidden');
+      modalKaryawan.classList.add('flex');
+    }
+
+    function hapusKaryawan(index) {
+      const data = JSON.parse(localStorage.getItem('karyawan')) || [];
+      data.splice(index, 1);
+      localStorage.setItem('karyawan', JSON.stringify(data));
+      loadKaryawan();
+    }
+
+    window.addEventListener('DOMContentLoaded', loadKaryawan);
+  </script>
+</body>
+</html>

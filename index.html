@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Manajemen Kafe</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+  <div class="flex">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-md min-h-screen md:block hidden">
+      <div class="p-6">
+        <h1 class="text-2xl font-bold text-blue-600">☕ Manajemen Kafe</h1>
+      </div>
+      <nav class="mt-4 space-y-1 px-4">
+        <a href="index.html" class="block py-2 px-3 rounded hover:bg-blue-100 text-blue-600 font-medium">Dashboard</a>
+        <a href="pesanan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Pesanan</a>
+        <a href="menu.html" class="block py-2 px-3 rounded hover:bg-blue-100">Menu</a>
+        <a href="karyawan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Karyawan</a>
+        <a href="laporan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Laporan</a>
+        <a href="pengaturan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Pengaturan</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8">
+      <h2 class="text-4xl font-bold mb-8 text-gray-800">Dashboard</h2>
+
+      <!-- Statistik -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+          <h3 class="text-lg text-gray-500 mb-2">Total Penjualan</h3>
+          <p class="text-3xl font-bold text-green-600">Rp 10.000.000</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+          <h3 class="text-lg text-gray-500 mb-2">Jumlah Pelanggan</h3>
+          <p class="text-3xl font-bold text-blue-600">150</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+          <h3 class="text-lg text-gray-500 mb-2">Menu Terpopuler</h3>
+          <ul id="popularMenu" class="text-gray-800 mt-2 space-y-1"></ul>
+        </div>
+      </section>
+
+      <!-- Tabel Menu -->
+      <section>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-700">Daftar Menu Populer</h2>
+        <div class="overflow-x-auto bg-white rounded-xl shadow-md">
+          <table class="min-w-full">
+            <thead class="bg-gray-200">
+              <tr>
+                <th class="py-3 px-4 text-left">Nama Menu</th>
+                <th class="py-3 px-4 text-left">Harga</th>
+                <th class="py-3 px-4 text-left">Stok</th>
+                <th class="py-3 px-4 text-left">Rating</th>
+                <th class="py-3 px-4 text-left">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="menuTableBody">
+              <tr>
+                <td class="py-3 px-4 namaMenu">Kopi Susu</td>
+                <td class="py-3 px-4 harga">Rp 20000</td>
+                <td class="py-3 px-4 stok">50</td>
+                <td class="py-3 px-4 rating">4.8</td>
+                <td class="py-3 px-4"><button class="text-blue-500 font-semibold editBtn">Edit</button></td>
+              </tr>
+              <tr>
+                <td class="py-3 px-4 namaMenu">Roti Bakar</td>
+                <td class="py-3 px-4 harga">Rp 15000</td>
+                <td class="py-3 px-4 stok">30</td>
+                <td class="py-3 px-4 rating">4.5</td>
+                <td class="py-3 px-4"><button class="text-blue-500 font-semibold editBtn">Edit</button></td>
+              </tr>
+              <tr>
+                <td class="py-3 px-4 namaMenu">Teh Tarik</td>
+                <td class="py-3 px-4 harga">Rp 10000</td>
+                <td class="py-3 px-4 stok">20</td>
+                <td class="py-3 px-4 rating">4.2</td>
+                <td class="py-3 px-4"><button class="text-blue-500 font-semibold editBtn">Edit</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal Edit -->
+  <div id="modalEdit" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
+    <div class="bg-white p-6 rounded-xl w-96 shadow-xl">
+      <h2 class="text-xl font-bold mb-4 text-gray-700">Edit Menu</h2>
+      <form id="editForm">
+        <div class="mb-4">
+          <label for="editNamaMenu" class="block text-gray-600 mb-1">Nama Menu</label>
+          <input type="text" id="editNamaMenu" class="w-full border px-3 py-2 rounded" required />
+        </div>
+        <div class="mb-4">
+          <label for="editHarga" class="block text-gray-600 mb-1">Harga</label>
+          <input type="number" id="editHarga" class="w-full border px-3 py-2 rounded" required />
+        </div>
+        <div class="mb-4">
+          <label for="editStok" class="block text-gray-600 mb-1">Stok</label>
+          <input type="number" id="editStok" class="w-full border px-3 py-2 rounded" required />
+        </div>
+        <div class="mb-4">
+          <label for="editRating" class="block text-gray-600 mb-1">Rating</label>
+          <input type="number" id="editRating" step="0.1" min="0" max="5" class="w-full border px-3 py-2 rounded" required />
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" id="cancelEditBtn" class="bg-gray-300 px-4 py-2 rounded">Batal</button>
+          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById('modalEdit');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    let currentRow = null;
+
+    // Buka modal
+    function openEditModal(nama, harga, stok, rating, row) {
+      document.getElementById('editNamaMenu').value = nama;
+      document.getElementById('editHarga').value = harga;
+      document.getElementById('editStok').value = stok;
+      document.getElementById('editRating').value = rating;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      currentRow = row;
+    }
+
+    // Tutup modal
+    cancelEditBtn.addEventListener('click', () => {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    });
+
+    // Simpan perubahan
+    document.getElementById('editForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const namaMenu = document.getElementById('editNamaMenu').value;
+      const harga = document.getElementById('editHarga').value;
+      const stok = document.getElementById('editStok').value;
+      const rating = document.getElementById('editRating').value;
+
+      currentRow.querySelector('.namaMenu').textContent = namaMenu;
+      currentRow.querySelector('.harga').textContent = 'Rp ' + harga;
+      currentRow.querySelector('.stok').textContent = stok;
+      currentRow.querySelector('.rating').textContent = rating;
+
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+
+      updatePopularMenu(); // Update menu populer juga
+    });
+
+    // Event tombol edit
+    document.querySelectorAll('.editBtn').forEach(button => {
+      button.addEventListener('click', function () {
+        const row = this.closest('tr');
+        const nama = row.querySelector('.namaMenu').textContent;
+        const harga = row.querySelector('.harga').textContent.replace('Rp ', '').replace('.', '');
+        const stok = row.querySelector('.stok').textContent;
+        const rating = row.querySelector('.rating').textContent;
+        openEditModal(nama, harga, stok, rating, row);
+      });
+    });
+
+    // Fungsi menampilkan menu populer
+    function updatePopularMenu() {
+      const rows = document.querySelectorAll('#menuTableBody tr');
+      const menuArray = [];
+
+      rows.forEach(row => {
+        const nama = row.querySelector('.namaMenu').textContent;
+        const rating = parseFloat(row.querySelector('.rating').textContent);
+        menuArray.push({ nama, rating });
+      });
+
+      menuArray.sort((a, b) => b.rating - a.rating);
+      const topMenus = menuArray.slice(0, 3);
+
+      const popularList = document.getElementById('popularMenu');
+      popularList.innerHTML = '';
+      topMenus.forEach(menu => {
+        const li = document.createElement('li');
+        li.textContent = `${menu.nama} (⭐ ${menu.rating})`;
+        popularList.appendChild(li);
+      });
+    }
+
+    // Jalankan saat halaman selesai dimuat
+    window.addEventListener('DOMContentLoaded', updatePopularMenu);
+  </script>
+</body>
+</html>

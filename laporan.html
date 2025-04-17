@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laporan Kafe</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+  <div class="flex flex-col md:flex-row">
+    <!-- Sidebar -->
+    <aside class="w-full md:w-64 bg-white shadow-md min-h-screen md:block hidden">
+      <div class="p-6">
+        <h1 class="text-2xl font-bold text-blue-600">☕ Manajemen Kafe</h1>
+      </div>
+      <nav class="mt-4 space-y-1 px-4">
+        <a href="index.html" class="block py-2 px-3 rounded hover:bg-blue-100 text-blue-600 font-medium">Dashboard</a>
+        <a href="pesanan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Pesanan</a>
+        <a href="menu.html" class="block py-2 px-3 rounded hover:bg-blue-100">Menu</a>
+        <a href="karyawan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Karyawan</a>
+        <a href="laporan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Laporan</a>
+        <a href="pengaturan.html" class="block py-2 px-3 rounded hover:bg-blue-100">Pengaturan</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 md:p-8">
+      <h2 class="text-4xl font-bold mb-8 text-gray-800">Laporan</h2>
+
+      <!-- Filter -->
+      <section class="mb-8">
+        <label for="filter" class="text-xl text-gray-700">Filter Laporan:</label>
+        <select id="filter" class="border px-4 py-2 rounded">
+          <option value="harian">Harian</option>
+          <option value="mingguan">Mingguan</option>
+          <option value="bulanan">Bulanan</option>
+        </select>
+      </section>
+
+      <!-- Grafik -->
+      <section class="mb-8">
+        <canvas id="laporanChart" class="w-full h-64"></canvas>
+      </section>
+
+      <!-- Tabel Laporan -->
+      <section>
+        <h2 class="text-2xl font-semibold mb-4 text-gray-700">Data Pesanan Berdasarkan Filter</h2>
+        <div class="overflow-x-auto bg-white rounded-xl shadow-md">
+          <table class="min-w-full">
+            <thead class="bg-gray-200">
+              <tr>
+                <th class="py-3 px-4 text-left">Tanggal</th>
+                <th class="py-3 px-4 text-left">Jumlah Pesanan</th>
+                <th class="py-3 px-4 text-left">Total Penghasilan</th>
+              </tr>
+            </thead>
+            <tbody id="laporanTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    let pesananData = JSON.parse(localStorage.getItem('daftarPesanan')) || [];
+    let laporanData = [];
+
+    function filterData(filter) {
+      const result = [];
+      const now = new Date();
+
+      pesananData.forEach((pesanan) => {
+        const tanggalPesanan = new Date(pesanan.tanggal);
+        let dateMatch = false;
+
+        if (filter === 'harian') {
+          dateMatch = now.toDateString() === tanggalPesanan.toDateString();
+        } else if (filter === 'mingguan') {
+          const weekStart = new Date(now.setDate(now.getDate() - now.getDay())); 
+          const weekEnd = new Date(now.setDate(now.getDate() - now.getDay() + 6));
+          dateMatch = tanggalPesanan >= weekStart && tanggalPesanan <= weekEnd;
+        } else if (filter === 'bulanan') {
+          dateMatch = now.getMonth() === tanggalPesanan.getMonth() && now.getFullYear() === tanggalPesanan.getFullYear();
+        }
+
+        if (dateMatch) {
+          result.push(pesanan);
+        }
+      });
+
+      return result;
+    }
+
+    function generateLaporan(filter) {
+      laporanData = filterData(filter);
+      renderLaporanTable();
+      updateChart();
+    }
+
+    function renderLaporanTable() {
+      const tableBody = document.getElementById('laporanTableBody');
+      tableBody.innerHTML = '';
+
+      laporanData.forEach((pesanan) => {
+        const row = document.createElement('tr');
+        row.classList.add('border-b');
+        
+        row.innerHTML = `
+          <td class="py-3 px-4">${pesanan.tanggal}</td>
+          <td class="py-3 px-4">${pesanan.jumlah}</td>
+          <td class="py-3 px-4">Rp ${pesanan.totalHarga.toLocaleString()}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    function updateChart() {
+      const labels = laporanData.map(pesanan => pesanan.tanggal);
+      const data = laporanData.map(pesanan => pesanan.totalHarga);
+
+      const ctx = document.getElementById('laporanChart').getContext('2d');
+      const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Total Penghasilan',
+            data: data,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    function init() {
+      const filter = document.getElementById('filter');
+      generateLaporan(filter.value);
+
+      filter.addEventListener('change', (event) => {
+        generateLaporan(event.target.value);
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
